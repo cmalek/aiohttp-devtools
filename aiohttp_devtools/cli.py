@@ -3,6 +3,7 @@ import traceback
 from pathlib import Path
 
 import click
+import ssl
 
 from .exceptions import AiohttpDevException
 from .logs import main_logger, setup_logging
@@ -13,6 +14,7 @@ from .start import StartProject, check_dir_clean
 from .version import VERSION
 
 _dir_existing = click.Path(exists=True, dir_okay=True, file_okay=False)
+_file_existing = click.Path(exists=True, dir_okay=False, file_okay=True)
 _file_dir_existing = click.Path(exists=True, dir_okay=True, file_okay=True)
 _dir_may_exist = click.Path(dir_okay=True, file_okay=False, writable=True, resolve_path=True)
 
@@ -68,6 +70,11 @@ aux_port_help = 'Port to serve auxiliary app (reload and static) on, default por
 @click.option('-p', '--port', 'main_port', envvar='AIO_PORT', type=click.INT, help=port_help)
 @click.option('--aux-port', envvar='AIO_AUX_PORT', type=click.INT, help=aux_port_help)
 @click.option('-v', '--verbose', is_flag=True, help=verbose_help)
+@click.option('--ssl-key-file', type=_file_existing, envvar="AIO_SSL_KEY_FILE", default=None,
+              help='The path to a file containing your SSL key.  You will also need to specify --ssl-cert-file.')
+@click.option('--ssl-cert-file', type=_file_existing, envvar="AIO_SSL_CERT_FILE", default=None,
+              help='The path to a file containing your SSL certificate and any intermediate certificates.  '
+                   'You will also need to specify --ssl-key-file.')
 def runserver(**config):
     """
     Run a development server for an aiohttp apps.

@@ -2,6 +2,7 @@ import asyncio
 import contextlib
 import json
 import mimetypes
+import ssl
 import sys
 from pathlib import Path
 from typing import Optional
@@ -135,7 +136,15 @@ async def start_main_app(config: Config, app_factory, loop):
     await check_port_open(config.main_port, loop)
     runner = web.AppRunner(app, access_log_class=AccessLogger)
     await runner.setup()
-    site = web.TCPSite(runner, host=HOST, port=config.main_port, shutdown_timeout=0.1)
+    ssl_context = None
+    if config.ssl_key_file and config.ssl_cert_file:
+        dft_logger.info(
+            'enabling SSL with key={} and cert={}'.format(config.ssl_key_file, config.ssl_cert_file)
+        )
+        ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        ssl_context.load_cert_chain(config.ssl_cert_file, config.ssl_key_file)
+
+    site = web.TCPSite(runner, host=HOST, port=config.main_port, shutdown_timeout=0.1, ssl_context=ssl_context)
     await site.start()
     return runner
 

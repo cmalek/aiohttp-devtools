@@ -39,7 +39,9 @@ class Config:
                  app_factory_name: str = None,
                  host: str = INFER_HOST,
                  main_port: int = 8000,
-                 aux_port: int = None):
+                 aux_port: int = None,
+                 ssl_key_file: str = None,
+                 ssl_cert_file: str = None):
         if root_path:
             self.root_path = Path(root_path).resolve()
             logger.debug('Root path specified: %s', self.root_path)
@@ -67,7 +69,15 @@ class Config:
         self.host = 'localhost' if self.infer_host else host
         self.main_port = main_port
         self.aux_port = aux_port or (main_port + 1)
+        self.ssl_key_file = ssl_key_file
+        self.ssl_cert_file = ssl_cert_file
         logger.debug('config loaded:\n%s', self)
+
+    @property
+    def scheme(self):
+        if self.ssl_key_file and self.ssl_cert_file:
+            return 'https'
+        return 'http'
 
     @property
     def static_path_str(self):

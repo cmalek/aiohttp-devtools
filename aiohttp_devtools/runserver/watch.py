@@ -73,7 +73,7 @@ class AppTask(WatchTask):
 
     async def _src_reload_when_live(self, checks=20):
         if self._app[WS]:
-            url = 'http://localhost:{.main_port}/?_checking_alive=1'.format(self._config)
+            url = '{.scheme}://localhost:{.main_port}/?_checking_alive=1'.format(self._config)
             logger.debug('checking app at "%s" is running before prompting reload...', url)
             for i in range(checks):
                 await asyncio.sleep(0.1)
@@ -89,7 +89,7 @@ class AppTask(WatchTask):
 
     def _start_dev_server(self):
         act = 'Start' if self._reloads == 0 else 'Restart'
-        logger.info('%sing dev server at http://%s:%s ●', act, self._config.host, self._config.main_port)
+        logger.info('%sing dev server at %s://%s:%s ●', act, self._config.scheme, self._config.host, self._config.main_port)
 
         try:
             tty_path = os.ttyname(sys.stdin.fileno())
